@@ -1,0 +1,408 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Jikan API - Clubs",
+        "description": "This API provides access to MyAnimeList's Clubs data with support for pagination and search functionality. It allows clients to fetch, search, and filter club information based on various query parameters.",
+        "version": "4.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://api.jikan.moe/v4",
+            "description": "Production server"
+        }
+    ],
+    "paths": {
+        "/clubs": {
+            "get": {
+                "summary": "Retrieve a paginated list of clubs",
+                "description": "Fetches a list of clubs with pagination and search capabilities. Clients can filter clubs based on various criteria such as type, category, and more.",
+                "operationId": "getClubsSearch",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The page number to retrieve. Starts at 1.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of items to retrieve per page.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search query string to filter clubs by name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter clubs by access type.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["public", "private", "secret"]
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter clubs by category.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "actors & artists",
+                                "anime",
+                                "characters",
+                                "cities & neighborhoods",
+                                "companies",
+                                "conventions",
+                                "games",
+                                "japan",
+                                "manga",
+                                "music",
+                                "others",
+                                "schools"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Sort the results by the specified field.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["mal_id", "name", "members_count", "created"]
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort direction for the ordered field.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["desc", "asc"]
+                        }
+                    },
+                    {
+                        "name": "letter",
+                        "in": "query",
+                        "description": "Return entries starting with the given letter.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z]$",
+                            "example": "A"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of clubs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Club"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/Pagination"
+                                        }
+                                    },
+                                    "required": ["data", "pagination"]
+                                },
+                                "examples": {
+                                    "successfulResponse": {
+                                        "summary": "Successful response",
+                                        "value": {
+                                            "pagination": {
+                                                "last_visible_page": 1,
+                                                "has_next_page": true
+                                            },
+                                            "data": [
+                                                {
+                                                    "mal_id": 1,
+                                                    "url": "https://myanimelist.net/clubs.php?cid=1",
+                                                    "images": {
+                                                        "jpg": {
+                                                            "image_url": "https://cdn.myanimelist.net/images/clubs/16/222057.jpg"
+                                                        }
+                                                    },
+                                                    "name": "Cowboy Bebop",
+                                                    "members": 1396,
+                                                    "category": "anime",
+                                                    "created": "2007-03-29T00:00:00+00:00",
+                                                    "access": "public"
+                                                },
+                                                {
+                                                    "mal_id": 2,
+                                                    "url": "https://myanimelist.net/clubs.php?cid=2",
+                                                    "images": {
+                                                        "jpg": {
+                                                            "image_url": "https://cdn.myanimelist.net/images/clubs/1/78225.jpg"
+                                                        }
+                                                    },
+                                                    "name": "SOL Brigade",
+                                                    "members": 1131,
+                                                    "category": "characters",
+                                                    "created": "2007-03-29T00:00:00+00:00",
+                                                    "access": "public"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "invalidPage": {
+                                        "summary": "Invalid page parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'page' parameter. It must be a positive integer."
+                                            }
+                                        }
+                                    },
+                                    "invalidLimit": {
+                                        "summary": "Invalid limit parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'limit' parameter. It must be an integer between 1 and 100."
+                                            }
+                                        }
+                                    },
+                                    "invalidType": {
+                                        "summary": "Invalid type parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'type' parameter. Allowed values are 'public', 'private', 'secret'."
+                                            }
+                                        }
+                                    },
+                                    "invalidCategory": {
+                                        "summary": "Invalid category parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'category' parameter. Allowed values are 'actors & artists', 'anime', 'characters', 'cities & neighborhoods', 'companies', 'conventions', 'games', 'japan', 'manga', 'music', 'others', 'schools'."
+                                            }
+                                        }
+                                    },
+                                    "invalidOrderBy": {
+                                        "summary": "Invalid order_by parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'order_by' parameter. Allowed values are 'mal_id', 'name', 'members_count', 'created'."
+                                            }
+                                        }
+                                    },
+                                    "invalidSort": {
+                                        "summary": "Invalid sort parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'sort' parameter. Allowed values are 'desc', 'asc'."
+                                            }
+                                        }
+                                    },
+                                    "invalidLetter": {
+                                        "summary": "Invalid letter parameter",
+                                        "value": {
+                                            "error": {
+                                                "code": 400,
+                                                "message": "Invalid 'letter' parameter. It must be a single alphabet character."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "serverError": {
+                                        "summary": "Server error example",
+                                        "value": {
+                                            "error": {
+                                                "code": 500,
+                                                "message": "An unexpected error occurred. Please try again later."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": ["Clubs"]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Image": {
+                "type": "object",
+                "properties": {
+                    "jpg": {
+                        "type": "object",
+                        "properties": {
+                            "image_url": {
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://cdn.myanimelist.net/images/clubs/16/222057.jpg",
+                                "description": "URL to the club's image in JPG format."
+                            }
+                        },
+                        "required": ["image_url"]
+                    }
+                },
+                "required": ["jpg"]
+            },
+            "Club": {
+                "type": "object",
+                "properties": {
+                    "mal_id": {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "Unique identifier for the club."
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://myanimelist.net/clubs.php?cid=1",
+                        "description": "URL to the club's page on MyAnimeList."
+                    },
+                    "images": {
+                        "$ref": "#/components/schemas/Image"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Cowboy Bebop",
+                        "description": "Name of the club."
+                    },
+                    "members": {
+                        "type": "integer",
+                        "example": 1396,
+                        "description": "Number of members in the club."
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "actors & artists",
+                            "anime",
+                            "characters",
+                            "cities & neighborhoods",
+                            "companies",
+                            "conventions",
+                            "games",
+                            "japan",
+                            "manga",
+                            "music",
+                            "others",
+                            "schools"
+                        ],
+                        "description": "Category of the club."
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2007-03-29T00:00:00+00:00",
+                        "description": "Creation date of the club."
+                    },
+                    "access": {
+                        "type": "string",
+                        "enum": ["public", "private", "secret"],
+                        "description": "Access level of the club. Can be 'public', 'private', or 'secret'."
+                    }
+                },
+                "required": ["mal_id", "url", "images", "name", "members", "category", "created", "access"]
+            },
+            "Pagination": {
+                "type": "object",
+                "properties": {
+                    "last_visible_page": {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "The last visible page number."
+                    },
+                    "has_next_page": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Indicates whether there is a next page."
+                    }
+                },
+                "required": ["last_visible_page", "has_next_page"]
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "integer",
+                                "example": 400,
+                                "description": "HTTP status code."
+                            },
+                            "message": {
+                                "type": "string",
+                                "example": "Invalid 'page' parameter. It must be a positive integer.",
+                                "description": "Detailed error message."
+                            }
+                        },
+                        "required": ["code", "message"]
+                    }
+                },
+                "required": ["error"]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Clubs",
+            "description": "Operations related to MyAnimeList clubs."
+        }
+    ]
+}
